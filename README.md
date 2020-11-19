@@ -1,13 +1,34 @@
-# Reverse engineering Starhub API
+# Using the program
 
 ## Prerequisites
 
-* Google Chrome 87.0.4280.66
+* Google Chrome 87.0.4280.66 (optional)
 * Python
 
 ## Getting started
 
 Install requirements with pip
+Run `main.py` with:
+
+* `--uid user@gmail.com --pw password`
+* `--utoken user_token`
+* `--utoken_file path_to_file`
+
+utoken can be saved to a file with `--save_utoken file_path`.
+
+`--mobile 12345678 23456789` to query data for the listed mobile numbers.
+
+### Login approach
+If using the logging in approach, we will use chromedriver to login and get our required information. However, this method takes way longer to execute as the website loads slow.
+
+### Result
+```json
+{'number': '12345678', 'data_usage': 9.426, 'data_left': 25.573, 'data_total': 35.0}
+{'number': '23456789', 'data_usage': 9.426, 'data_left': 25.573, 'data_total': 35.0}
+```
+
+
+# Reverse engineering Starhub API
 
 Record network in devtools, login to starhub.com. Go to https://secure.starhub.com/myaccountmgr/#/services/summary/. Start searching for values such as phone number in network tab. Afterwards, copy cURL to bash for import in Postman. If network has too much traffic, use HAR Analyzer tool.
 

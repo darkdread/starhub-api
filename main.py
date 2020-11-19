@@ -4,14 +4,19 @@ import requests
 import json
 import time
 import argparse
+import typing
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from datetime import datetime
 
 chrome_options = Options()
-chrome_options.add_argument("--headless")
+# chrome_options.add_argument("--headless")
 
 parser = argparse.ArgumentParser(description="Starhub API processor.")
+parser.add_argument("--mobile", dest="mobile", action="store",
+                    nargs="*",
+                    help="Mobile numbers to query")
+
 group = parser.add_argument_group("Login approach")
 group.add_argument("--uid", dest="uid", action="store",
                    help="Username for Starhub")
@@ -19,10 +24,10 @@ group.add_argument("--pw", dest="pw", action="store",
                    help="Password for Starhub")
 parser.add_argument("--save_utoken", dest="save_utoken", action="store",
                     help="Save utoken to file")
-group = parser.add_argument_group("Utoken approach")
-parser.add_argument("--utoken", dest="utoken", action="store",
+group2 = parser.add_argument_group("Utoken approach")
+group2.add_argument("--utoken", dest="utoken", action="store",
                     help="Read utoken from argument")
-parser.add_argument("--utoken_file", dest="utoken_file", action="store",
+group2.add_argument("--utoken_file", dest="utoken_file", action="store",
                     help="Read utoken from file")
 
 
@@ -40,7 +45,7 @@ elif (args.uid is not None and
     sys.exit("Cannot use both login and utoken approach at the same time.")
 
 if (args.utoken_file is not None and not os.path.exists(args.utoken_file)):
-    sys.exit("{args.utoken_file} does not exist.")
+    sys.exit(f"{args.utoken_file} does not exist.")
 
 
 class ApiError(Exception):
@@ -60,7 +65,7 @@ class StarhubApi():
 
     def get_vctk3_dict(self, uid, pw):
         driver = webdriver.Chrome('chromedriver.exe',
-                                  chrome_options=chrome_options)
+                                  options=chrome_options)
         driver.get('https://login.starhubgee.com.sg/VCRLS/login.cgi')
 
         uid_input = driver.find_element_by_css_selector('[name="loginform"] #fake_uid')
@@ -115,6 +120,35 @@ class StarhubApi():
         return overview_json["mainContext"]["present"]["any"][0]["dataUsages"]["usageDetail"]
 
 
+class StarhubJsonHelper:
+
+    def __init__(self, overview_json):
+        self.overview_json = overview_json
+
+    def get_mobile_numbers(self) -> list:
+        mobile_numbers = []
+        for mobile_json in self.overview_json:
+            mobile_numbers.append(mobile_json["usageServiceId"])
+
+        return mobile_numbers
+
+    def get_mobile_json(self, mobile) -> str:
+        for mobile_json in self.overview_json:
+            if (mobile_json["usageServiceId"] == mobile):
+                return mobile_json
+
+        return None
+
+    def get_data_usage(self, mobile_json) -> dict:
+        out = {
+            "data_usage": mobile_json["totalUsage"],
+            "data_left": mobile_json["usageDifference"],
+            "data_total": mobile_json["totalFreeUnits"]
+        }
+
+        return out
+
+
 api = StarhubApi()
 
 if (args.utoken is not None):
@@ -132,7 +166,27 @@ else:
         f.close()
 
 mobiles_overview_json = api.get_mobile_overview(utoken)
-print(mobiles_overview_json)
+
+json_helper = StarhubJsonHelper(mobiles_overview_json)
+
+if (args.mobile is not None):
+    query = args.mobile
+else:
+    query = json_helper.get_mobile_numbers()
+
+for mobile in query:
+    mobile_dict = {
+        "number": mobile
+    }
+    mobile_json = json_helper.get_mobile_json(mobile)
+
+    if (mobile_json is not None):
+        my_usage = json_helper.get_data_usage(mobile_json)
+        mobile_dict.update(my_usage)
+        print(mobile_dict)
+    else:
+        print(f"{mobile} not found in overview.")
+
 # time.sleep(99999)
 
 # driver.quit()

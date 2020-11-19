@@ -11,11 +11,12 @@
             "program": "${workspaceFolder}/main.py",
             "console": "internalConsole",
             "args": [
-                // "--uid", "xxx@gmail.com",
-                // "--pw", "xxx",
+                // "--uid", "${env:uid}",
+                // "--pw", "${env:pw}",
                 "--save_utoken", "utoken",
                 // "--utoken", "dd893a651844396e9a1201ac89a46aed9d07e2ef",
-                "--utoken_file", "utoken"
+                "--utoken_file", "utoken",
+                // "--mobile", "{env:mobile}}"
             ]
         }
     ]
