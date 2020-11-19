@@ -1,0 +1,8 @@
+certifi==2020.11.8
+chardet==3.0.4
+idna==2.10
+pycodestyle==2.6.0
+requests==2.25.0
+rope==0.18.0
+selenium==3.141.0
+urllib3==1.26.2
