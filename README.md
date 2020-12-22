@@ -7,7 +7,7 @@
 
 ## Getting started
 
-Install requirements with pip
+Install requirements with pip  
 Run `main.py` with:
 
 * `--uid user@gmail.com --pw password`
