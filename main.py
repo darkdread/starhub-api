@@ -143,7 +143,8 @@ class StarhubJsonHelper:
         out = {
             "data_usage": mobile_json["totalUsage"],
             "data_left": mobile_json["usageDifference"],
-            "data_total": mobile_json["totalFreeUnits"]
+            "data_total": mobile_json["totalFreeUnits"],
+            "json": mobile_json
         }
 
         return out
